@@ -204,7 +204,11 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self.initializeParameterNode()
 
     def parameterSetChanged(self, parameterSet):
-        logging.info(parameterSet.GetName())
+        if not parameterSet:
+            logging.warning("parameterSet is None")
+            return
+        self.setParameterNode(TemplateModuleParameterNode(parameterSet))
+        self.printAllParameterSets()
 
     def initializeParameterNode(self) -> None:
         """Ensure parameter node exists and observed."""
@@ -257,6 +261,18 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.logic.process(self.ui.inputSelector.currentNode(), self.ui.invertedOutputSelector.currentNode(),
                                    self.ui.imageThresholdSliderWidget.value, not self.ui.invertOutputCheckBox.checked, showResult=False)
 
+    def printAllParameterSets(self):
+        numberOfParameterSets = self.ui.parameterSetSelector.nodeCount()
+        for i in range(numberOfParameterSets):
+            parameterSet = self.ui.parameterSetSelector.nodeFromIndex(i)
+            logging.info("-------- Index: " + str(i)  + " -----------" )
+            logging.info("inputVolume: " + parameterSet.GetParameter("inputVolume") + " " + (parameterSet.GetNodeReferenceID("inputVolume") if parameterSet.GetNodeReference("inputVolume") else " No node reference") + " " + (parameterSet.GetNodeReference("inputVolume").GetName() if parameterSet.GetNodeReference("inputVolume") else ""))
+            logging.info("imageThreshold: " + parameterSet.GetParameter("imageThreshold"))
+            logging.info("invertThreshold: " + parameterSet.GetParameter("invertThreshold"))
+            logging.info("thresholdedVolume: " + parameterSet.GetParameter("thresholdedVolume") + " " + (parameterSet.GetNodeReferenceID("thresholdedVolume") if parameterSet.GetNodeReference("thresholdedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("thresholdedVolume").GetName() if parameterSet.GetNodeReference("thresholdedVolume") else ""))
+            logging.info("invertedVolume: " + parameterSet.GetParameter("invertedVolume") + " " + (parameterSet.GetNodeReferenceID("invertedVolume") if parameterSet.GetNodeReference("invertedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("invertedVolume").GetName() if parameterSet.GetNodeReference("invertedVolume") else ""))
+            logging.info("_parameterNodeGuiTag: " + str(self._parameterNodeGuiTag))
+            logging.info("ModuleName attribute: " + parameterSet.GetAttribute("ModuleName"))
 
 #
 # TemplateModuleLogic
