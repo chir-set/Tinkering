@@ -219,8 +219,8 @@
         <property name="text">
          <string/>
         </property>
-        <property name="invertThreshold" stdset="0">
-         <string/>
+        <property name="SlicerParameterName" stdset="0">
+         <string notr="true">invertThreshold</string>
         </property>
        </widget>
       </item>
