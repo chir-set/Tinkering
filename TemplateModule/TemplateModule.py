@@ -172,8 +172,7 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Buttons
         self.ui.applyButton.connect("clicked(bool)", self.onApplyButton)
 
-        # Make sure parameter node is initialized (needed for module reload)
-        self.initializeParameterNode()
+        # Refrain from adding a new or an existing parameter set. See **.
 
     def cleanup(self) -> None:
         """Called when the application closes and the module widget is destroyed."""
@@ -182,7 +181,8 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
     def enter(self) -> None:
         """Called each time the user opens this module."""
         # Make sure parameter node exists and observed
-        self.initializeParameterNode()
+        if self._parameterNode:
+            self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
 
     def exit(self) -> None:
         """Called each time the user opens a different module."""
@@ -194,34 +194,21 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def onSceneStartClose(self, caller, event) -> None:
         """Called just before the scene is closed."""
-        # Parameter node will be reset, do not use it anymore
-        self.setParameterNode(None)
 
     def onSceneEndClose(self, caller, event) -> None:
         """Called just after the scene is closed."""
-        # If this module is shown while the scene is closed then recreate a new parameter node immediately
-        if self.parent.isEntered:
-            self.initializeParameterNode()
+        self.parameterSetChanged(None)
 
-    def parameterSetChanged(self, parameterSet):
-        if not parameterSet:
-            logging.warning("parameterSet is None")
+    # May be also named initializeParameterNode().
+    def parameterSetChanged(self, newParameterSet):
+        # ** Refrain from adding a new vtkMRMLScriptedModuleNode to scene if parameterNode is None.
+        # When nodes are deleted, the wrapper outputs errors and alien nodes appear in the selector.
+        if not newParameterSet:
+            self.setParameterNode(None)
             return
-        self.setParameterNode(TemplateModuleParameterNode(parameterSet))
+        nextParameterNode = TemplateModuleParameterNode(newParameterSet)
+        self.setParameterNode(nextParameterNode)
         self.printAllParameterSets()
-
-    def initializeParameterNode(self) -> None:
-        """Ensure parameter node exists and observed."""
-        # Parameter node stores all user choices in parameter values, node selections, etc.
-        # so that when the scene is saved and reloaded, these settings are restored.
-
-        self.setParameterNode(self.logic.getParameterNode())
-
-        # Select default input nodes if nothing is selected yet to save a few clicks for the user
-        if not self._parameterNode.inputVolume:
-            firstVolumeNode = slicer.mrmlScene.GetFirstNodeByClass("vtkMRMLScalarVolumeNode")
-            if firstVolumeNode:
-                self._parameterNode.inputVolume = firstVolumeNode
 
     def setParameterNode(self, inputParameterNode: Optional[TemplateModuleParameterNode]) -> None:
         """
@@ -263,9 +250,16 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
 
     def printAllParameterSets(self):
         numberOfParameterSets = self.ui.parameterSetSelector.nodeCount()
-        for i in range(numberOfParameterSets):
+        logging.info("Number of parameter sets: " + str(numberOfParameterSets))
+        if numberOfParameterSets == 0:
+            return
+        for i in range(0, numberOfParameterSets):
             parameterSet = self.ui.parameterSetSelector.nodeFromIndex(i)
+            if not parameterSet:
+                logging.info("Parameter set is None. Index: " + str(i))
+                return
             logging.info("-------- Index: " + str(i)  + " -----------" )
+            # Why is the node reference None?
             logging.info("inputVolume: " + parameterSet.GetParameter("inputVolume") + " " + (parameterSet.GetNodeReferenceID("inputVolume") if parameterSet.GetNodeReference("inputVolume") else " No node reference") + " " + (parameterSet.GetNodeReference("inputVolume").GetName() if parameterSet.GetNodeReference("inputVolume") else ""))
             logging.info("imageThreshold: " + parameterSet.GetParameter("imageThreshold"))
             logging.info("invertThreshold: " + parameterSet.GetParameter("invertThreshold"))
@@ -292,9 +286,13 @@ class TemplateModuleLogic(ScriptedLoadableModuleLogic):
     def __init__(self) -> None:
         """Called when the logic class is instantiated. Can be used for initializing member variables."""
         ScriptedLoadableModuleLogic.__init__(self)
+        self._parameterNode = None
+
+    def setParameterNode(self, parameterNode):
+        self._parameterNode = parameterNode
 
     def getParameterNode(self):
-        return TemplateModuleParameterNode(super().getParameterNode())
+        return self._parameterNode
 
     def process(self,
                 inputVolume: vtkMRMLScalarVolumeNode,
