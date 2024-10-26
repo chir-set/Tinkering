@@ -160,8 +160,10 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # Create logic class. Logic implements all computations that should be possible to run
         # in batch mode, without a graphical user interface.
         self.logic = TemplateModuleLogic()
+        self.ui.parameterSetSelector.addAttribute("vtkMRMLScriptedModuleNode", "ModuleName", self.moduleName)
 
         # Connections
+        self.ui.parameterSetSelector.connect("currentNodeChanged(vtkMRMLNode*)", self.parameterSetChanged)
 
         # These connections ensure that we update parameter node when scene is closed
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
@@ -200,6 +202,9 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
         # If this module is shown while the scene is closed then recreate a new parameter node immediately
         if self.parent.isEntered:
             self.initializeParameterNode()
+
+    def parameterSetChanged(self, parameterSet):
+        logging.info(parameterSet.GetName())
 
     def initializeParameterNode(self) -> None:
         """Ensure parameter node exists and observed."""
