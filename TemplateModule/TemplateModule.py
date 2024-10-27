@@ -15,7 +15,7 @@ from slicer.parameterNodeWrapper import (
 )
 
 from slicer import vtkMRMLScalarVolumeNode
-
+from slicer import vtkMRMLSegmentationNode
 
 #
 # TemplateModule
@@ -123,7 +123,7 @@ class TemplateModuleParameterNode:
     thresholdedVolume: vtkMRMLScalarVolumeNode
     invertedVolume: vtkMRMLScalarVolumeNode
     testSpinBox: float = 0.0
-
+    testSegmentation: vtkMRMLSegmentationNode
 #
 # TemplateModuleWidget
 #
@@ -266,6 +266,8 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             logging.info("invertThreshold: " + parameterSet.GetParameter("invertThreshold"))
             logging.info("thresholdedVolume: " + parameterSet.GetParameter("thresholdedVolume") + " " + (parameterSet.GetNodeReferenceID("thresholdedVolume") if parameterSet.GetNodeReference("thresholdedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("thresholdedVolume").GetName() if parameterSet.GetNodeReference("thresholdedVolume") else ""))
             logging.info("invertedVolume: " + parameterSet.GetParameter("invertedVolume") + " " + (parameterSet.GetNodeReferenceID("invertedVolume") if parameterSet.GetNodeReference("invertedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("invertedVolume").GetName() if parameterSet.GetNodeReference("invertedVolume") else ""))
+            logging.info("testSpinBox: " + parameterSet.GetParameter("testSpinBox"))
+            logging.info("testSegmentation: " + parameterSet.GetParameter("testSegmentation") + " " + (parameterSet.GetNodeReferenceID("testSegmentation") if parameterSet.GetNodeReference("testSegmentation") else "No node reference") + " " + (parameterSet.GetNodeReference("testSegmentation").GetName() if parameterSet.GetNodeReference("testSegmentation") else ""))
             logging.info("_parameterNodeGuiTag: " + str(self._parameterNodeGuiTag))
             logging.info("ModuleName attribute: " + parameterSet.GetAttribute("ModuleName"))
 

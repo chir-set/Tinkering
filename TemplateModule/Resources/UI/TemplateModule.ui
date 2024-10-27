@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>325</width>
-    <height>344</height>
+    <height>376</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
@@ -129,6 +129,40 @@
         </property>
         <property name="SlicerParameterName" stdset="0">
          <string>testSpinBox</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Test segmentation:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="qMRMLNodeComboBox" name="testSegmentationSelector">
+        <property name="nodeTypes">
+         <stringlist notr="true">
+          <string>vtkMRMLSegmentationNode</string>
+         </stringlist>
+        </property>
+        <property name="hideChildNodeTypes">
+         <stringlist notr="true"/>
+        </property>
+        <property name="noneEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="editEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="renameEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="interactionNodeSingletonTag">
+         <string notr="true"/>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>testSegmentation</string>
         </property>
        </widget>
       </item>
@@ -360,6 +394,22 @@
     <hint type="destinationlabel">
      <x>206</x>
      <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TemplateModule</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>testSegmentationSelector</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>162</x>
+     <y>187</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>219</x>
+     <y>161</y>
     </hint>
    </hints>
   </connection>
