@@ -16,6 +16,7 @@ from slicer.parameterNodeWrapper import (
 
 from slicer import vtkMRMLScalarVolumeNode
 from slicer import vtkMRMLSegmentationNode
+from slicer import vtkMRMLMarkupsCurveNode
 
 #
 # TemplateModule
@@ -124,6 +125,7 @@ class TemplateModuleParameterNode:
     invertedVolume: vtkMRMLScalarVolumeNode
     testSpinBox: float = 0.0
     testSegmentation: vtkMRMLSegmentationNode
+    testCurve: vtkMRMLMarkupsCurveNode
 #
 # TemplateModuleWidget
 #
@@ -249,6 +251,12 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 self.logic.process(self.ui.inputSelector.currentNode(), self.ui.invertedOutputSelector.currentNode(),
                                    self.ui.imageThresholdSliderWidget.value, not self.ui.invertOutputCheckBox.checked, showResult=False)
 
+    def _printNodeParameter(self, parameterSet, identifier):
+        logging.info(identifier + ": " + parameterSet.GetParameter(identifier) + " " + (parameterSet.GetNodeReferenceID(identifier) if parameterSet.GetNodeReference(identifier) else " No node reference") + " " + (parameterSet.GetNodeReference(identifier).GetName() if parameterSet.GetNodeReference(identifier) else ""))
+
+    def _printParameter(self, parameterSet, identifier):
+        logging.info(identifier + ": " + parameterSet.GetParameter(identifier))
+
     def printAllParameterSets(self):
         numberOfParameterSets = self.ui.parameterSetSelector.nodeCount()
         logging.info("Number of parameter sets: " + str(numberOfParameterSets))
@@ -261,13 +269,15 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
                 return
             logging.info("-------- Index: " + str(i)  + " -----------" )
             # Why is the node reference None?
-            logging.info("inputVolume: " + parameterSet.GetParameter("inputVolume") + " " + (parameterSet.GetNodeReferenceID("inputVolume") if parameterSet.GetNodeReference("inputVolume") else " No node reference") + " " + (parameterSet.GetNodeReference("inputVolume").GetName() if parameterSet.GetNodeReference("inputVolume") else ""))
-            logging.info("imageThreshold: " + parameterSet.GetParameter("imageThreshold"))
-            logging.info("invertThreshold: " + parameterSet.GetParameter("invertThreshold"))
-            logging.info("thresholdedVolume: " + parameterSet.GetParameter("thresholdedVolume") + " " + (parameterSet.GetNodeReferenceID("thresholdedVolume") if parameterSet.GetNodeReference("thresholdedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("thresholdedVolume").GetName() if parameterSet.GetNodeReference("thresholdedVolume") else ""))
-            logging.info("invertedVolume: " + parameterSet.GetParameter("invertedVolume") + " " + (parameterSet.GetNodeReferenceID("invertedVolume") if parameterSet.GetNodeReference("invertedVolume") else "No node reference") + " " + (parameterSet.GetNodeReference("invertedVolume").GetName() if parameterSet.GetNodeReference("invertedVolume") else ""))
-            logging.info("testSpinBox: " + parameterSet.GetParameter("testSpinBox"))
-            logging.info("testSegmentation: " + parameterSet.GetParameter("testSegmentation") + " " + (parameterSet.GetNodeReferenceID("testSegmentation") if parameterSet.GetNodeReference("testSegmentation") else "No node reference") + " " + (parameterSet.GetNodeReference("testSegmentation").GetName() if parameterSet.GetNodeReference("testSegmentation") else ""))
+            self._printNodeParameter(parameterSet, "inputVolume")
+            self._printNodeParameter(parameterSet, "thresholdedVolume")
+            self._printNodeParameter(parameterSet, "invertedVolume")
+            self._printNodeParameter(parameterSet, "testSegmentation")
+            self._printNodeParameter(parameterSet, "testCurve")
+            self._printParameter(parameterSet, "imageThreshold")
+            self._printParameter(parameterSet, "invertThreshold")
+            self._printParameter(parameterSet, "testSpinBox")
+
             logging.info("_parameterNodeGuiTag: " + str(self._parameterNodeGuiTag))
             logging.info("ModuleName attribute: " + parameterSet.GetAttribute("ModuleName"))
 
