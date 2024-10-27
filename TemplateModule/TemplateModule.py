@@ -122,7 +122,7 @@ class TemplateModuleParameterNode:
     invertThreshold: bool = False
     thresholdedVolume: vtkMRMLScalarVolumeNode
     invertedVolume: vtkMRMLScalarVolumeNode
-
+    testSpinBox: float = 0.0
 
 #
 # TemplateModuleWidget
@@ -226,6 +226,7 @@ class TemplateModuleWidget(ScriptedLoadableModuleWidget, VTKObservationMixin):
             self._parameterNodeGuiTag = self._parameterNode.connectGui(self.ui)
             self.addObserver(self._parameterNode, vtk.vtkCommand.ModifiedEvent, self._checkCanApply)
             self._checkCanApply()
+        self.logic.setParameterNode(self._parameterNode)
 
     def _checkCanApply(self, caller=None, event=None) -> None:
         if self._parameterNode and self._parameterNode.inputVolume and self._parameterNode.thresholdedVolume:
